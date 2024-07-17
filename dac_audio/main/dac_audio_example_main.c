@@ -11,7 +11,7 @@
 #include "freertos/queue.h"
 #include "driver/dac_continuous.h"
 #include "esp_check.h"
-#include "audio_example_file.h"
+#include "DARK_ARIA.h"
 
 static const char *TAG = "dac_audio";
 
@@ -61,11 +61,10 @@ static void dac_write_data_synchronously(dac_continuous_handle_t handle, uint8_t
 {
     ESP_LOGI(TAG, "Audio size %d bytes, played at frequency %d Hz synchronously", data_size, CUSTOM_SAMPLE_RATE);
     uint32_t cnt = 1;
-    while (1) {
+    
         printf("Play count: %"PRIu32"\n", cnt++);
         ESP_ERROR_CHECK(dac_continuous_write(handle, data, data_size, NULL, -1));
         vTaskDelay(pdMS_TO_TICKS(1000));
-    }
 }
 #endif
 

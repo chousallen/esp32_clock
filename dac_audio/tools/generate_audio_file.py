@@ -45,4 +45,4 @@ if __name__ == '__main__':
     for wavefile in os.listdir('./'):
         if wavefile.endswith('.wav'):
             wav_list.append(wavefile)
-    gen_wave_table(wav_file_list=wav_list, target_file_name='audio_example_file.h')
+    gen_wave_table(wav_file_list=wav_list, target_file_name='.\main\DARK_ARIA.h')
