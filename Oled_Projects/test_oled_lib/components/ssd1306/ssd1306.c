@@ -64,7 +64,7 @@ void ssd1306_set_buffer(SSD1306_t * dev, const uint8_t * buffer)
 	int index = 0;
 	for (int page=0; page<dev->_pages;page++) {
 		memcpy(&dev->_page[page]._segs, &buffer[index], 128);
-		index = index + 128;
+		index += 128;
 	}
 }
 
