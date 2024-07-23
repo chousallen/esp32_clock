@@ -2,12 +2,18 @@
 #include <stdint.h>
 #include <string.h>
 
-uint16_t buff_o[2] = {0};
+#include "test.h"
+
+int16_t buff[8] = {0};
 
 int main()
 {
-    int16_t x = 0xffff;
-    printf("x = %u\n", x);
+    print();
+    setter(10);
+    print();
+    pri = 20;
+    print();
+
     return 0;
     
 }
