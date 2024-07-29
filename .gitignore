@@ -2,3 +2,4 @@
 **/.vscode/
 **/managed_components/
 **/Resources/
+./Audio_Projects/esp32-mp3-decoder
