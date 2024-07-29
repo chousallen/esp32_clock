@@ -11,6 +11,7 @@
 #include "timer.h"
 #include "encoder.h"
 
+#include "logo_bitmap.h"
 #include "numbers_bitmap.h"
 #include "small_numbers_bitmap.h"
 #include "digital_clock.h"
@@ -25,6 +26,7 @@ typedef enum
 
 typedef enum
 {
+    SHOW_LOGO,
     DIGITAL_CLOCK, 
     DIGITAL_CLOCK_SET_SECOND,
     DIGITAL_CLOCK_SET_MINUTE,
@@ -63,18 +65,29 @@ struct Hands hour_hand = {.type = HOUR, .len = 15, .size = 2, .style = 0xff, .an
 struct Hands minute_hand = {.type = MINUTE, .len = 25, .size = 1, .style = 0xff, .angle = PI/2, .position = {97, 31, 1}};
 struct Hands second_hand = {.type = SECOND, .len = 30, .size = 1, .style = 0b11001100, .angle = PI/2, .position = {97, 31, 1}};
 
+Time_t getTime(int hour, int minute, int second)
+{
+    int total_second = hour*3600 + minute*60 + second;
+    for(; total_second < 0; total_second += 86400);
+    for(; total_second >= 86400; total_second -= 86400);
+    Time_t tmp = {total_second/3600%24, (total_second/60)%60, total_second%60, 0};
+    return tmp;
+}
+
 void updateTime()
 {
+    time = getTime((Timer_Seconds()/3600)%24 + ori_time.hour, (Timer_Seconds()/60)%60 + ori_time.minute, (Timer_Seconds()%60 + ori_time.second));
     time.millisecond = (Timer_Millis()%1000 + ori_time.millisecond)%1000;
-    time.second = (Timer_Seconds()%60 + ori_time.second)%60;
-    time.minute = ((Timer_Seconds()/60)%60 + ori_time.minute)%60;
-    time.hour = ((Timer_Seconds()/3600)%24 + ori_time.hour)%24;
+    //time.second = (Timer_Seconds()%60 + ori_time.second)%60;
+    //time.minute = ((Timer_Seconds()/60)%60 + ori_time.minute)%60;
 }
 
 void buttonInit()
 {
     gpio_set_direction(GPIO_NUM_4, GPIO_MODE_INPUT);
     gpio_set_pull_mode(GPIO_NUM_4, GPIO_PULLUP_ONLY);
+    gpio_set_direction(GPIO_NUM_0, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(GPIO_NUM_0, GPIO_PULLUP_ONLY);
 }
 
 void buttonHandle()
@@ -111,17 +124,6 @@ void buttonHandle()
     }
 }
 
-Time_t getTime(int hour, int minute, int second)
-{
-    int total_second = hour*3600 + minute*60 + second;
-    if(total_second < 0)
-    {
-        total_second += 86400;
-    }
-    Time_t tmp = {total_second/3600%24, (total_second/60)%60, total_second%60, 0};
-    return tmp;
-}
-
 void setTime(void *tmp)
 {
     SCREEN_STATE *state = (SCREEN_STATE*)tmp;
@@ -154,6 +156,16 @@ void stateHandle()
     TaskHandle_t hSetTime = NULL;
     while(1)
     {
+        if(!gpio_get_level(GPIO_NUM_0))
+        {
+            screen_state = SHOW_LOGO;
+            vTaskDelay(pdMS_TO_TICKS(500));
+            continue;
+        }
+        if(screen_state == SHOW_LOGO)
+        {
+            screen_state = DIGITAL_CLOCK;
+        }
         if(xQueueReceive(button_queue, &tmp, 0))
         {
             if(tmp == BUTTON_CLICK)
@@ -199,6 +211,11 @@ void displayCurrMode(SCREEN_STATE mode)
 {
     switch(mode)
     {
+        case SHOW_LOGO:
+            Oled_Draw_Bitmap(bitmap_logo, (Pixel_t){0, 0, 1}, BITMAP_LOGO_WIDTH, BITMAP_LOGO_HEIGHT);
+            Oled_Show();
+            Oled_Clear(0x00);
+            break;
         case DIGITAL_CLOCK:
             displayDigitalClock(&time);
             break;
@@ -235,6 +252,10 @@ void app_main(void)
     xTaskCreate(buttonHandle, "buttonHandle", 2048, NULL, 5, NULL);
     xTaskCreate(stateHandle, "stateHandle", 2048, NULL, 6, NULL);
 
+    Oled_Draw_Bitmap(bitmap_logo, (Pixel_t){0, 0, 1}, BITMAP_LOGO_WIDTH, BITMAP_LOGO_HEIGHT);
+    Oled_Show();
+    Oled_Clear(0x00);
+    vTaskDelay(pdMS_TO_TICKS(5000));
 
     while (1)
     {
