@@ -36,13 +36,13 @@ struct Hands
     Pixel_t position;
 };
 
-Pixel_t center = {97, 31, 1};
+Pixel_t center = {64, 32, 1};
 uint8_t radius = 30;
 Time_t time = {0, 0, 0, 0};
 const Time_t ori_time = {17, 10, 0, 0};
-struct Hands hour_hand = {.type = HOUR, .len = 15, .size = 2, .style = 0xff, .angle = PI/2, .position = {97, 31, 1}};
-struct Hands minute_hand = {.type = MINUTE, .len = 25, .size = 1, .style = 0xff, .angle = PI/2, .position = {97, 31, 1}};
-struct Hands second_hand = {.type = SECOND, .len = 30, .size = 1, .style = 0b11001100, .angle = PI/2, .position = {97, 31, 1}};
+struct Hands hour_hand = {.type = HOUR, .len = 15, .size = 2, .style = 0xff, .angle = PI/2, .position = {0, 0, 1}};
+struct Hands minute_hand = {.type = MINUTE, .len = 25, .size = 1, .style = 0xff, .angle = PI/2, .position = {0, 0, 1}};
+struct Hands second_hand = {.type = SECOND, .len = 30, .size = 1, .style = 0b10101010, .angle = PI/2, .position = {0, 0, 1}};
 
 void updateTime()
 {
